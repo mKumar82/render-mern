@@ -37,6 +37,8 @@ app.get("/", (req, res) => {
   res.send("i am a live");
 });
 
+
+
 //sattic files
 app.use(express.static(path.join(__dirname,"./client/build")));
 
