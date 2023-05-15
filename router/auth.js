@@ -6,9 +6,7 @@ const authenticate = require("../middleware/authenticate");
 require("../db/conn");
 const User = require("../models/userSchema");
 
-router.get("/", (req, res) => {
-  res.send("hello from router auth js");
-});
+
 
 
 

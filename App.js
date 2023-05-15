@@ -33,11 +33,9 @@ app.use(require("./router/auth"));
 const PORT = process.env.PORT  || 5000;
 
 // when routes is not used app.get is used to service request
-app.get("/", (req, res) => {
-  res.send("i am a live");
-});
-
-
+// app.get("/", (req, res) => {
+//   res.sendFile(path.join(__dirname, 'path_to_your_login_html_file'));
+// });
 
 //sattic files
 app.use(express.static(path.join(__dirname,"./client/build")));
