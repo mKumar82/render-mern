@@ -6,10 +6,6 @@ const authenticate = require("../middleware/authenticate");
 require("../db/conn");
 const User = require("../models/userSchema");
 
-
-
-
-
 // ---------------using async / await---------------Preffered
 router.post("/register", async (req, res) => {
   //destructuring data
@@ -65,6 +61,8 @@ router.post("/login", async (req, res) => {
       res.cookie("jwtoken", token, {
         expires: new Date(Date.now() + 25892000000),
         httpOnly: true,
+        sameSite: "None",
+        secure: true,
       });
 
       if (!isMatch) {
@@ -82,7 +80,7 @@ router.post("/login", async (req, res) => {
 
 // authenticate is the middleware which will check if user is logged in or not
 // if logged in then send rootUser ,rootusercontains all the user details
-router.post("/about", authenticate, (req, res) => {
+router.get("/about", authenticate, (req, res) => {
   res.send(req.rootUser);
 });
 
@@ -123,10 +121,78 @@ router.post("/contact", authenticate, async (req, res) => {
   }
 });
 
+//edit profile
+router.put("/profile", authenticate, async (req, res) => {
+  try {
+    const updatedData = req.body;
+    console.log("in profile backend");
+
+    const user = await User.findOne({ _id: req.userID });
+
+    if (!user) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    user.name = updatedData.name;
+    user.work = updatedData.work;
+    user.experience = updatedData.experience;
+    user.address = updatedData.address;
+    user.projects = updatedData.projects;
+    user.links = [...updatedData.links];
+    user.skills = [...updatedData.skills];
+    // user.image = [...updatedData.image];
+    user.graduations = [...updatedData.graduations];
+
+    await user.save();
+
+    res.status(201).json({ message: "Profile updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating the profile" });
+  }
+});
+
+// const multer = require("multer");
+
+// // Configure Multer for handling file uploads
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "uploads/");
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + "-" + file.originalname);
+//   },
+// });
+
+// const upload = multer({ storage: storage });
+
+// Define the API route for image upload
+// router.post("/upload", upload.single("image"), (req, res) => {
+//   const { filename, path } = req.file;
+
+//   const image = new Image({
+//     filename,
+//     filepath: path,
+//   });
+
+//   image
+//     .save()
+//     .then(() => {
+//       res.status(200).json({ message: "Image saved successfully!" });
+//     })
+//     .catch((error) => {
+//       res.status(500).json({ error: "Failed to save image." });
+//     });
+// });
 
 //logout page
-router.get("/logout",(req, res) => {
-  res.clearCookie('jwtoken');
+router.get("/logout", (req, res) => {
+  res.clearCookie("jwtoken", {
+    sameSite: "None",
+    secure: true,
+  });
   res.status(200).send("user logout");
 });
 module.exports = router;
